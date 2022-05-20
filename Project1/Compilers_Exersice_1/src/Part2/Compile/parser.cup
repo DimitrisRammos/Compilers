@@ -1,0 +1,192 @@
+/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
+/**
+ *  Package and Import Specifications
+ */
+import java_cup.runtime.*;
+//import String;
+/**
+ *  Usercode Components
+ */
+parser code {:
+    // Connect this parser to a scanner!
+    Scanner s;
+    Parser(Scanner s){ this.s=s; }
+
+    public static void print( String str){
+        System.out.println(str);
+    }
+:}
+
+/* define how to connect to the scanner! */
+scan with {: return s.next_token(); :};
+
+/**
+ *  Symbol Lists
+ */
+
+/* Terminals (tokens returned by the scanner). */
+terminal            CONCAT, LPAREN, RPAREN, RBRUCK, LBRUCK;
+terminal            COM, IF, ELSE, PREF, REV;
+
+terminal String     STRING_LITERAL, ID;        // our scanner provides numbers as strings
+
+
+/*  Non terminals */
+
+non terminal            Start;
+non terminal String     FunctionDecl;
+non terminal String     FunctionList;
+non terminal String     MainFunction, FunctionCall, expr;
+nonterminal String      ArgumentCall, ArgumentList;
+nonterminal String      ArgumentCallMAIN, ArgumentListMAIN;
+
+
+/**
+ *  Precedence Declarations
+ */
+precedence left IF;
+precedence left CONCAT;
+precedence left REV;
+
+precedence left LPAREN,RPAREN, COM;
+
+/**
+ *  The Grammar Rules
+ */
+
+//Start program
+ Start ::= FunctionList:e2 MainFunction:m1
+                        {:
+                              print("public class Main{");
+                              print("\tpublic static void main(String[] args) {\n");
+
+                              print(m1);
+                              print("\n\t}\n");
+
+                              print(e2);
+
+                              print("}");
+
+                        :}
+           | FunctionList:f2
+                        {:
+                            print("public class Main{");
+                            print("\tpublic static void main(String[] args) {\n");
+
+                            print("\n\t}\n");
+
+                            print(f2);
+                            print("}");
+                        :}
+           | MainFunction:m1
+                        {:
+                            print("public class Main{");
+                            print("\tpublic static void main(String[] args) {\n");
+                            print(m1);
+
+                            print("\n\t}\n");
+                            print("}");
+                        :}
+;
+
+
+//for the function calls
+ FunctionCall ::= ID:nam ArgumentListMAIN:a1
+                {:
+                    RESULT =  nam + a1 ;
+                :}
+            ;
+
+
+//for static void main function
+MainFunction ::= MainFunction:m expr:f1
+                    {:
+                        RESULT = m + "\t\tSystem.out.println(" + f1 + ");\n";
+                    :}
+                |   expr:f1
+                    {:
+                        RESULT = "\t\tSystem.out.println(" + f1 + ");\n";
+                    :}
+
+                ;
+
+//for arguments for maain call functions
+ArgumentCallMAIN ::= COM expr:e ArgumentCallMAIN:a
+                       {:
+                            RESULT = ", " + e + a;
+                       :}
+
+               |  RPAREN
+                      {:
+                            RESULT = ")";
+                      :}
+
+               ;
+
+
+//List for arguments calls
+ArgumentListMAIN ::= LPAREN expr:e ArgumentCallMAIN:a
+                    {:
+                        RESULT = "( " + e + a;
+                    :}
+               | LPAREN RPAREN
+                    {:
+                        RESULT = "()";
+                    :}
+
+               ;
+
+
+//for function declaration
+FunctionDecl ::= ID:nam ArgumentList:e1 LBRUCK expr:e RBRUCK
+                        {:
+                                RESULT = "\tpublic static String " + nam + e1 +  " {\n\t\t" + "return " + e +";\n\t}\n\n";
+                        :}
+                ;
+
+
+//List for function decl
+FunctionList ::= FunctionList:f1 FunctionDecl:f2
+                    {:
+                        RESULT = f1 + f2;
+                    :}
+               |    FunctionDecl:f2
+                    {:
+                        RESULT = f2;
+                    :}
+               ;
+
+
+
+//expr for the price
+expr ::=  IF LPAREN expr:e1 PREF expr:e2  RPAREN expr:e3 ELSE expr:e4
+                    {:
+                        RESULT = "((" + "("+e1+").startsWith(" + e2 +")" +")" + "?" + "(" + e3 + ")" + ":" + "(" + e4 + "))";
+                    :}
+
+        | REV expr:e                 {: RESULT = "(new StringBuffer("+e+").reverse().toString())"; :}
+        | expr:e1 CONCAT expr:e2           {: RESULT = e1 + " + " + e2; :}
+        | STRING_LITERAL:str         {: RESULT = "(\"" + str + "\")"; :}
+        | ID:nam                     {: RESULT = nam; :}
+        | FunctionCall:f             {: RESULT = f; :}
+        ;
+
+
+//for argyment in function declarations
+ArgumentCall ::= COM ID:elem ArgumentCall:a   {: RESULT = ", String " + elem + a; :}
+               |  RPAREN                     {: RESULT = ")"; :}
+               ;
+
+
+
+ArgumentList ::= LPAREN ID:elem ArgumentCall:a
+                    {:
+                        RESULT = "( String " + elem + a;
+                    :}
+               | LPAREN RPAREN
+                    {:
+                        RESULT = "()";
+                    :}
+
+               ;
+
