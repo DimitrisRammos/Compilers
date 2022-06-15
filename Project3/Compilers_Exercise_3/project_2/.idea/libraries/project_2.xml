@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="project_2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/jtb132di.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javacc5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
