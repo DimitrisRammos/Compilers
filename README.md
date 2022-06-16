@@ -17,12 +17,16 @@ cd Project1/program
 Check the Vocalization [here.](https://github.com/DimitrisRammos/Compilers/blob/main/Project2/Vocalization.txt)
 
 ```
-cd Project2/program
+cd Project2/program/minijava_example
+make all
+java Main Example.java
 ```
 
 ## For Project3
 Check the Vocalization [here.](https://github.com/DimitrisRammos/Compilers/blob/main/Project3/Vocalization.txt)
 
 ```
-cd Project3/program
+cd Project3/program/minijava_example
+make all
+java Main Example.java
 ```
