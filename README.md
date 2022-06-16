@@ -1,6 +1,6 @@
 # Compilers
 
-This project is work from our sixth half year in https://www.di.uoa.gr/.
+This project is work from our sixth semester in https://www.di.uoa.gr/.
 
 ## Install
 
